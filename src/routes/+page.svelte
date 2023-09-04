@@ -4,45 +4,33 @@
 	import { mapStore } from '../stores/map';
 	import { addAIAnswerToMap } from '../lib/util/map';
 	import TypingDots from '../lib/components/TypingDots.svelte';
+	import { localstorageStore } from '../stores/localstorage';
 
 	let message = '';
-
-	type Question = {
-		type: 'QUESTION';
-		ts: Date;
-		question: string;
-	};
-
-	type Answer = {
-		type: 'ANSWER';
-		ts: Date;
-		choices: ChatCompletion['choices'];
-	};
-
-	type ChatEntry = Question | Answer;
-
-	let chatHistory: ChatEntry[];
-	$: chatHistory = [];
 
 	let loading: boolean;
 
 	const onSubmit = async () => {
-		chatHistory = [
-			...chatHistory,
-			{
-				type: 'QUESTION',
-				ts: new Date(),
-				question: message
-			}
-		];
 		loading = true;
-		const response = await fetch('/api/chat', {
+		const fetchRequest = fetch('/api/chat', {
 			method: 'POST',
-			body: JSON.stringify({ message }),
+			body: JSON.stringify({
+				message,
+				previousMessages: $localstorageStore
+			}),
 			headers: {
 				'Content-Type': 'application/json'
 			}
 		});
+		message = '';
+		localstorageStore.set([
+			...$localstorageStore,
+			{
+				role: 'user',
+				content: message
+			}
+		]);
+		const response = await fetchRequest;
 		const completion = (await response.json()) as ChatCompletion;
 		loading = false;
 
@@ -50,22 +38,18 @@
 		if (geojsonAnswer) {
 			addAIAnswerToMap(JSON.parse(geojsonAnswer), $mapStore);
 		}
-
-		chatHistory = [
-			...chatHistory,
-			{
-				type: 'ANSWER',
-				ts: new Date(),
-				choices: completion.choices
-			}
-		];
+		localstorageStore.set([...$localstorageStore, completion.choices?.[0].message]);
 	};
 
-	const choiceToText = (choice: ChatCompletion.Choice) => {
-		if (choice?.message?.content) {
-			return JSON.parse(choice?.message?.content).text;
+	const getResponseText = (content: string | null) => {
+		if (content) {
+			return JSON.parse(content).text;
 		}
 		return 'Response contains no "text".';
+	};
+
+	const onClear = () => {
+		localstorageStore.set([]);
 	};
 </script>
 
@@ -73,18 +57,16 @@
 	<header class="header">ARDA AI</header>
 	<div class="chat-container">
 		<div class="chat-history">
-			{#each chatHistory as chatEntry}
-				{#if chatEntry.type === 'QUESTION'}
+			{#each $localstorageStore as chatEntry}
+				{#if chatEntry.role === 'user'}
 					<div class="chat-question">
-						{chatEntry.question}
+						{chatEntry.content}
 					</div>
 				{:else}
 					<div class="chat-answer">
-						{#each chatEntry.choices as choice}
-							<div class="chat-answer-choice">
-								{choiceToText(choice)}
-							</div>
-						{/each}
+						<div class="chat-answer-choice">
+							{getResponseText(chatEntry.content)}
+						</div>
 					</div>
 				{/if}
 			{/each}
@@ -93,6 +75,11 @@
 					<TypingDots />
 				</div>
 			{/if}
+			<div class="clear-button-wrapper">
+				<button class="button" on:click={onClear}>
+					<i class="material-icons">delete_sweep</i>
+				</button>
+			</div>
 		</div>
 		<div class="chat-prompt">
 			<textarea
@@ -132,6 +119,8 @@
 	}
 
 	header {
+		font-size: 2em;
+		line-height: 2em;
 		grid-area: header;
 		display: flex;
 		align-items: center;
@@ -145,6 +134,8 @@
 		flex-direction: column;
 		.chat-history {
 			flex: 1;
+			font-size: 1.25em;
+			line-height: 1.25em;
 			display: flex;
 			flex-direction: column;
 
@@ -166,6 +157,28 @@
 			.awaiting-answer {
 				align-self: flex-end;
 				background-color: rgb(255, 202, 183);
+			}
+
+			.clear-button-wrapper {
+				flex: 1;
+				display: flex;
+				align-items: flex-end;
+			}
+
+			.button {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 10px 20px;
+				background-color: #3498db;
+				color: #ffffff;
+				border: none;
+				cursor: pointer;
+				transition: background-color 0.3s ease;
+			}
+
+			.button:hover {
+				background-color: #2980b9;
 			}
 		}
 		.chat-prompt {
