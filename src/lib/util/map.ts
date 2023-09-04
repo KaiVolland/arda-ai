@@ -23,7 +23,7 @@ export const addAIAnswerToMap = (answer: Answer, map: Map) => {
       vectorSource.clear();
       vectorSource.addFeatures(features);
       map.getView().fit(vectorSource.getExtent(), {
-        maxZoom: 12
+        maxZoom: 10
       });
     }
   }

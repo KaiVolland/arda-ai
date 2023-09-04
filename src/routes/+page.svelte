@@ -3,6 +3,7 @@
 	import Map from '../lib/components/Map.svelte';
 	import { mapStore } from '../stores/map';
 	import { addAIAnswerToMap } from '../lib/util/map';
+	import TypingDots from '../lib/components/TypingDots.svelte';
 
 	let message = '';
 
@@ -88,12 +89,22 @@
 				{/if}
 			{/each}
 			{#if loading}
-				<div class="awaiting-answer">. . .</div>
+				<div class="awaiting-answer">
+					<TypingDots />
+				</div>
 			{/if}
 		</div>
 		<div class="chat-prompt">
-			<input name="message" autocomplete="off" bind:value={message} />
-			<button on:click={onSubmit}>send</button>
+			<textarea
+				name="message"
+				bind:value={message}
+				on:keydown={(e) => {
+					if (e.key === 'Enter') onSubmit();
+				}}
+			/>
+			<button class="button" on:click={onSubmit}>
+				<i class="material-icons">send</i>
+			</button>
 		</div>
 	</div>
 	<div class="map-container">
@@ -116,23 +127,23 @@
 			'header header'
 			'chat map'
 			'footer footer';
-		grid-template-rows: 50px 1fr 50px;
+		grid-template-rows: 3em 1fr 1.5em;
 		grid-template-columns: 1fr 3fr;
 	}
 
 	header {
 		grid-area: header;
-		border: 1px solid gainsboro;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		box-shadow: 0 2px 10px gainsboro;
+		z-index: 1;
 	}
 	.chat-container {
 		grid-area: chat;
 		display: flex;
 		flex-direction: column;
 		.chat-history {
-			border: 1px solid gainsboro;
 			flex: 1;
 			display: flex;
 			flex-direction: column;
@@ -158,20 +169,42 @@
 			}
 		}
 		.chat-prompt {
-			border: 1px solid gainsboro;
 			display: flex;
 
-			input {
+			textarea {
+				resize: none;
 				flex: 1;
+				font-size: 1.25em;
+				line-height: 1.25em;
+				padding: 0.5em;
+				border-width: 1px;
+				border-radius: 0;
+				&:focus-visible {
+					border-radius: 0;
+				}
+			}
+
+			.button {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 10px 20px;
+				background-color: #3498db;
+				color: #ffffff;
+				border: none;
+				cursor: pointer;
+				transition: background-color 0.3s ease;
+			}
+
+			.button:hover {
+				background-color: #2980b9;
 			}
 		}
 	}
 	.map-container {
 		grid-area: map;
-		border: 1px solid gainsboro;
 	}
 	footer {
 		grid-area: footer;
-		border: 1px solid gainsboro;
 	}
 </style>
