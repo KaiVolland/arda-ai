@@ -2,7 +2,7 @@
 	import Map from 'ol/Map';
 	import View from 'ol/View';
 	import TileLayer from 'ol/layer/Tile';
-	import OSM from 'ol/source/OSM';
+	import TileWMS from 'ol/source/TileWMS';
 	import { fromLonLat } from 'ol/proj';
 
 	import 'ol/ol.css';
@@ -26,9 +26,7 @@
 			source: new VectorSource(),
 			style: new Style({
 				image: new Icon({
-					anchor: [0.5, 46],
-					anchorXUnits: 'fraction',
-					anchorYUnits: 'pixels',
+					anchor: [0.5, 1],
 					src: 'assets/marker.png'
 				}),
 				stroke: new Stroke({
@@ -41,12 +39,21 @@
 			})
 		});
 		vectorLayer.set('name', 'vector');
+		var topPlusOpenLayer = new TileLayer({
+			source: new TileWMS({
+				url: 'https://sgx.geodatenzentrum.de/wms_topplus_open?',
+				params: {
+					LAYERS: 'web',
+					FORMAT: 'image/png',
+					TILED: true
+				},
+				serverType: 'geoserver'
+			})
+		});
 		map = new Map({
 			target: node.id,
 			layers: [
-				new TileLayer({
-					source: new OSM()
-				}),
+				topPlusOpenLayer,
 				vectorLayer
 			],
 			view: new View({

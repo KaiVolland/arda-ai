@@ -22,7 +22,6 @@
 				'Content-Type': 'application/json'
 			}
 		});
-		message = '';
 		localstorageStore.set([
 			...$localstorageStore,
 			{
@@ -30,6 +29,7 @@
 				content: message
 			}
 		]);
+		message = '';
 		const response = await fetchRequest;
 		const completion = (await response.json()) as ChatCompletion;
 		loading = false;
