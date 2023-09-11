@@ -1,22 +1,17 @@
-# create-svelte
+# ARDA AI
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+## Requirements
 
-## Creating a project
+Create an `.env` file with the following values:
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+```
+OPENAI_API_KEY: [YOUR_OPEN_AI_KEY] // eg. sk-43rt8347968rg347rfg348ifg34uzfb3ufewbk
+OPENAI_MODEL: [THE_MODEL_YOU_WANT_TO_USE] // eg. gpt-3.5-turbo (default)
 ```
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Start a development server:
 
 ```bash
 npm run dev
@@ -34,5 +29,3 @@ npm run build
 ```
 
 You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.

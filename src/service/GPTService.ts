@@ -1,4 +1,5 @@
 import { OPENAI_API_KEY } from '$env/static/private'
+import { OPENAI_MODEL } from '$env/static/private'
 
 import OpenAI from 'openai';
 import { advice } from '../lib/default_advice';
@@ -22,7 +23,7 @@ export async function sendMessage(message: string, previousMessages: ChatComplet
         content
       }
     ],
-    model: 'gpt-3.5-turbo',
+    model: OPENAI_MODEL || 'gpt-3.5-turbo',
   });
   return completion;
 }
