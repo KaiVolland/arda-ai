@@ -1,12 +1,11 @@
-import { OPENAI_API_KEY } from '$env/static/private'
-import { OPENAI_MODEL } from '$env/static/private'
+import { env } from '$env/dynamic/private'
 
 import OpenAI from 'openai';
 import { advice } from '../lib/default_advice';
 import type { ChatCompletionMessage } from 'openai/resources/chat';
 
 const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY
+  apiKey: env.OPENAI_API_KEY
 });
 
 export async function sendMessage(message: string, previousMessages: ChatCompletionMessage[] = []) {
@@ -23,7 +22,7 @@ export async function sendMessage(message: string, previousMessages: ChatComplet
         content
       }
     ],
-    model: OPENAI_MODEL || 'gpt-3.5-turbo',
+    model: env.OPENAI_MODEL || 'gpt-3.5-turbo',
   });
   return completion;
 }
